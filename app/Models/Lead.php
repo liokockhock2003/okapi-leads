@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\LeadStatus;
+use App\Enums\MalaysianState;
 use App\Enums\PropertyType;
 use App\Enums\RoofType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,6 +33,7 @@ class Lead extends Model
         'monthly_bill_rm' => 'integer',
         'property_type'   => PropertyType::class,
         'roof_type'       => RoofType::class,
+        'state'           => MalaysianState::class,
         'status'          => LeadStatus::class,
     ];
 
