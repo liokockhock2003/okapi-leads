@@ -34,13 +34,13 @@ class StoreLeadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_name'   => ['required', 'string', 'max:255'],
-            'email'           => ['required', 'email', 'max:255'],
-            'phone'           => ['required', 'string', 'max:20'],
+            'customer_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['required', 'string', 'max:20'],
             'monthly_bill_rm' => ['required', 'integer', 'min:0'],
-            'property_type'   => ['required', Rule::enum(PropertyType::class)],
-            'roof_type'       => ['required', Rule::enum(RoofType::class)],
-            'state'           => ['required', Rule::enum(MalaysianState::class)],
+            'property_type' => ['required', Rule::enum(PropertyType::class)],
+            'roof_type' => ['required', Rule::enum(RoofType::class)],
+            'state' => ['required', Rule::enum(MalaysianState::class)],
         ];
     }
 }
