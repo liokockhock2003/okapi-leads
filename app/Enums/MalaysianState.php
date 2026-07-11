@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
+use Filament\Support\Contracts\HasLabel;
+
 /**
  * The 13 Malaysian states + 3 federal territories.
  *
@@ -12,7 +14,7 @@ namespace App\Enums;
  * qualification. That business rule lives in LeadQualificationService — this enum
  * only owns the closed set of valid state names (the input contract).
  */
-enum MalaysianState: string
+enum MalaysianState: string implements HasLabel
 {
     // Peninsular Malaysia — states
     case Johor          = 'Johor';
@@ -35,4 +37,10 @@ enum MalaysianState: string
     case Sabah          = 'Sabah';
     case Sarawak        = 'Sarawak';
     case Labuan         = 'Labuan';
+
+    public function getLabel(): string
+    {
+        // The backing value is already the display name (e.g. "Pulau Pinang").
+        return $this->value;
+    }
 }
