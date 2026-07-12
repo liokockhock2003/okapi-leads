@@ -1,0 +1,57 @@
+# Self-contained stack: containerized Postgres + the Laravel app (web + queue worker).
+# Independent from the local WSL Postgres — this DB lives in the `pgdata` volume.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: okapi_leads
+      POSTGRES_USER: okapi
+      POSTGRES_PASSWORD: okapi
+    ports:
+      # Host 5433 → container 5432, so it doesn't clash with local WSL Postgres on 5432.
+      # (DBeaver on Windows can connect to this container's DB at localhost:5433.)
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U okapi -d okapi_leads"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    # Run migrations once the DB is up, then serve.
+    command: sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"
+    ports:
+      - "8000:8000"
+    environment: &laravel-env
+      # Local-only throwaway key (same category as the okapi/okapi creds below) —
+      # committing it is fine. Production supplies its own APP_KEY from the host env.
+      APP_KEY: base64:EXcaXyNXKaFSVmxtsCd7R3wDFXCFEIM5zUHOddXnqpw=
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: pgsql
+      DB_HOST: db          # service name — how the app reaches Postgres inside the network
+      DB_PORT: 5432
+      DB_DATABASE: okapi_leads
+      DB_USERNAME: okapi
+      DB_PASSWORD: okapi
+      QUEUE_CONNECTION: database
+      MAIL_MAILER: log
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: php artisan queue:work --tries=3
+    environment: *laravel-env   # reuse the same env block as `app`
+    restart: unless-stopped     # if it starts before app finishes migrating, retry
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

@@ -1,0 +1,5 @@
+# Rebuilt inside the image / not wanted in the build context.
+/vendor
+/node_modules
+/.git
+.env
