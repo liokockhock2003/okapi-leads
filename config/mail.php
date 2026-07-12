@@ -113,4 +113,16 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Internal Lead-Notification Recipient
+    |--------------------------------------------------------------------------
+    |
+    | The team inbox that receives an internal email for every new lead
+    | processed by ProcessLeadJob. Sourced from LEADS_INTERNAL_RECIPIENT.
+    |
+    */
+
+    'internal_recipient' => env('LEADS_INTERNAL_RECIPIENT', 'leads@okapi-solar.test'),
+
 ];

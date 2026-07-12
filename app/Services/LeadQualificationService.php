@@ -9,14 +9,16 @@ use App\Enums\MalaysianState;
 use App\Enums\PropertyType;
 use App\Enums\RoofType;
 
-
-class LeadQualificationService {
+class LeadQualificationService
+{
     private const QUALIFY_BILL = 200;
+
     private const REVIEW_FLOOR = 150;
 
-    public function resolve(int $bill, PropertyType $property, RoofType $roofType, MalaysianState $state): LeadStatus {
+    public function resolve(int $bill, PropertyType $property, RoofType $roofType, MalaysianState $state): LeadStatus
+    {
         // Property must be Landed or Commercial
-        if (! in_array($property, [PropertyType::Landed, PropertyType::Commercial], true)){
+        if (! in_array($property, [PropertyType::Landed, PropertyType::Commercial], true)) {
             return LeadStatus::Disqualified;
         }
 
@@ -26,7 +28,7 @@ class LeadQualificationService {
         }
 
         // State: if state is Sabah, Sarawak or Labuan, return Disqualified
-        if (in_array($state, [MalaysianState::Sarawak, MalaysianState::Sabah, MalaysianState::Labuan], true)){
+        if (in_array($state, [MalaysianState::Sarawak, MalaysianState::Sabah, MalaysianState::Labuan], true)) {
             return LeadStatus::Disqualified;
         }
 
@@ -35,12 +37,11 @@ class LeadQualificationService {
             return LeadStatus::Disqualified;
         }
 
-        // All hard rules pass and bill >= 150 
+        // All hard rules pass and bill >= 150
         if ($bill >= self::QUALIFY_BILL) {
-            return LeadStatus::Qualified;   
+            return LeadStatus::Qualified;
         } else {
             return LeadStatus::UnderReview;
         }
     }
-
 }

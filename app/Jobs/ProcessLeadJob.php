@@ -23,12 +23,6 @@ class ProcessLeadJob implements ShouldQueue
     use Queueable;
 
     /**
-     * Internal team inbox for lead notifications. In a real deployment this
-     * would come from config/env, not a constant.
-     */
-    private const INTERNAL_TEAM = 'leads@okapi-solar.test';
-
-    /**
      * @param  array<string, mixed>  $data  Validated lead payload from StoreLeadRequest.
      */
     public function __construct(public readonly array $data) {}
@@ -82,7 +76,7 @@ class ProcessLeadJob implements ShouldQueue
 
         // 3. Notify the internal team and the customer. The `log` mail driver
         //    writes both messages to storage/logs/laravel.log.
-        Mail::to(self::INTERNAL_TEAM)->send(new LeadStatusInternal($lead));
+        Mail::to(config('mail.internal_recipient'))->send(new LeadStatusInternal($lead));
         Mail::to($lead->email)->send(new LeadStatusCustomer($lead));
     }
 }
