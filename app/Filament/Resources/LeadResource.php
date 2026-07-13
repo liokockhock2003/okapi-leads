@@ -24,6 +24,13 @@ class LeadResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'customer_name';
 
+    protected static ?int $navigationSort = 1;
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -119,7 +126,6 @@ class LeadResource extends Resource
     {
         return [
             'index' => Pages\ListLeads::route('/'),
-            'create' => Pages\CreateLead::route('/create'),
             'edit' => Pages\EditLead::route('/{record}/edit'),
         ];
     }
