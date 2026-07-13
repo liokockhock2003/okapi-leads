@@ -1,0 +1,18 @@
+# Production stack for the VM. Postgres + Redis run natively on the host, so both
+# services use host networking to reach them at 127.0.0.1. Secrets live in
+# /opt/okapi/.env (not committed). Image is built from the Dockerfile `production`
+# stage; run migrations as a separate one-off step (see README deployment plan).
+services:
+  app:
+    image: ${APP_IMAGE:-okapi-leads:latest}
+    command: sh -c "php artisan config:cache && php artisan octane:start --server=swoole --host=0.0.0.0 --port=8000"
+    env_file: /opt/okapi/.env
+    network_mode: host
+    restart: unless-stopped
+
+  horizon:
+    image: ${APP_IMAGE:-okapi-leads:latest}
+    command: sh -c "php artisan config:cache && php artisan horizon"
+    env_file: /opt/okapi/.env
+    network_mode: host
+    restart: unless-stopped
