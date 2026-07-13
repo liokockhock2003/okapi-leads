@@ -123,6 +123,8 @@ return [
     |
     */
 
-    'internal_recipient' => env('LEADS_INTERNAL_RECIPIENT', 'leads@okapi-solar.test'),
+    // `?:` (not the 2nd arg of env) so a *blank* LEADS_INTERNAL_RECIPIENT= in .env
+    // also falls back — env()'s default only applies when the var is entirely unset.
+    'internal_recipient' => env('LEADS_INTERNAL_RECIPIENT') ?: 'leads@okapi-solar.test',
 
 ];

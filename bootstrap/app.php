@@ -15,5 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // API routes must always return JSON errors (e.g. 422 on validation),
+        // never an HTML redirect — even when the caller omits Accept: application/json.
+        $exceptions->shouldRenderJsonWhen(
+            fn ($request, \Throwable $e) => $request->is('api/*') || $request->expectsJson()
+        );
     })->create();
