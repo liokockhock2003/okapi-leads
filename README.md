@@ -134,15 +134,19 @@ git clone <repo-url> && cd okapi-leads
 docker compose up --build          # builds the image; starts db + app + worker; migrates on boot
 ```
 
-Then, one-time setup for demo data and an admin login:
+Then create an admin login, and load demo data by firing the requests in **`leads.http`**
+(they POST through the real API — no separate seeder):
 
 ```bash
-docker compose exec app php artisan db:seed              # 15 demo leads across all statuses
 docker compose exec app php artisan make:filament-user   # create an admin for /admin
+# then open leads.http and send the requests to http://localhost:8000
+# (the worker container processes them; ~15 leads across all statuses)
 ```
 
 - API: `POST http://localhost:8000/api/leads`
 - Admin: `http://localhost:8000/admin`
+- Demo data: **`leads.http`** (VS Code REST Client / JetBrains HTTP client) — 15 leads plus
+  a duplicate and an invalid request to demonstrate dedup and validation.
 - The containerized Postgres is separate from any local Postgres; external tools (e.g. DBeaver)
   can reach it at `localhost:5433`.
 
@@ -169,8 +173,8 @@ php artisan key:generate
 #       DB_DATABASE=okapi_leads, DB_USERNAME=okapi, DB_PASSWORD=okapi
 #       QUEUE_CONNECTION=database, MAIL_MAILER=log
 
-# 4. migrate + seed + create an admin
-php artisan migrate --seed
+# 4. migrate + create an admin
+php artisan migrate
 php artisan make:filament-user
 ```
 
@@ -181,6 +185,9 @@ php artisan serve                 # API + /admin
 php artisan queue:work            # background lead processing (RESTART after code changes)
 tail -f storage/logs/laravel.log  # "sent" emails + duplicate-skip logs
 ```
+
+**Load demo data** by firing the requests in **`leads.http`** (needs `serve` + `queue:work`
+running) — they ingest ~15 leads through the real API. There is no lead seeder.
 
 ## Configuration
 
@@ -229,8 +236,12 @@ Invalid input returns **`422`** with per-field errors. Enum fields are validated
 
 ### Admin dashboard
 
-`/admin` (Filament) — view all leads with colored status badges, **filter by status**, and
-**manually change a lead's status** (or edit customer data). Every change is audited.
+`/admin` (Filament) — two screens:
+
+- **Leads** — view all leads with colored status badges, **filter by status**, and **manually
+  change a lead's status** (or edit customer data). Every change is audited.
+- **Activity Log** — a **read-only** audit view listing each change: *when*, *action*
+  (updated/deleted), *which lead*, *changed by*, and the *old → new* diff, with a detail view.
 
 ### Notifications
 
@@ -242,9 +253,11 @@ Two emails per new lead, rendered to `storage/logs/laravel.log` (log driver):
 
 ### Audit trail
 
-Every `Lead` create/update writes an `activity_log` row (field, old → new, when, causer) via
-`spatie/laravel-activitylog`. API-created leads have a **null causer**; admin edits in Filament
-are **attributed to the logged-in admin**.
+Requirement 6 is about *changes*, so the audit records **updates and deletions only** — lead
+**creation is not logged**. Each `updated` / `deleted` event writes an `activity_log` row (field,
+old → new, when, causer) via `spatie/laravel-activitylog` (`$recordEvents` on the `Lead` model).
+Because leads only ever change through the Filament admin, **every audit row is attributed to the
+logged-in admin**. Browse them on the Activity Log page.
 
 ## Testing
 
@@ -310,3 +323,8 @@ Cloud SQL for backups/HA).
   rebuilds don't churn the key.
 - **Enums implement Filament `HasLabel`/`HasColor`** — keeps display vocabulary with the enum and
   the resource DRY, at the cost of a light UI-framework dependency on the domain enums.
+- **Audit records changes only** (`updated` + `deleted`, not creation) — requirement 6 is about
+  *changes*, so lead creation isn't logged; every audit row is an admin-attributed change.
+- **Demo data via `leads.http`, not a seeder** — leads are ingested through the real endpoint, so
+  the demo exercises the full pipeline (validation → qualification → persist) instead of inserting
+  pre-set rows; the file doubles as manual API test cases.
