@@ -1,0 +1,48 @@
+# Local stack: containerized Postgres + Laravel app (web) + queue worker.
+# Config for the app/worker lives in .env.docker (copied to .env on boot).
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: okapi_leads
+      POSTGRES_USER: okapi
+      POSTGRES_PASSWORD: okapi
+    ports:
+      - "5433:5432"   # host 5433 avoids clashing with local Postgres on 5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U okapi -d okapi_leads"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      target: base
+    command: sh -c "cp -f .env.docker .env && php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"
+    ports:
+      - "8000:8000"
+    healthcheck:   # healthy once serve is listening, i.e. after migrations
+      test: ["CMD-SHELL", "php -r \"exit(@fsockopen('127.0.0.1', 8000) ? 0 : 1);\""]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 40s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      target: base
+    command: sh -c "cp -f .env.docker .env && php artisan queue:work --tries=3"
+    restart: unless-stopped
+    depends_on:      # wait until app is healthy (migrations done)
+      app:
+        condition: service_healthy
+
+volumes:
+  pgdata:

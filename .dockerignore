@@ -3,3 +3,6 @@
 /node_modules
 /.git
 .env
+# Keep the host's local log history out of the image (the dir itself stays,
+# preserved by storage/logs/.gitignore).
+/storage/logs/*.log
