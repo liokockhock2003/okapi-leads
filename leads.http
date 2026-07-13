@@ -1,0 +1,275 @@
+########################################################################
+# Okapi Leads — manual API requests (VS Code REST Client / JetBrains HTTP)
+#
+# Demo leads are ingested through the REAL endpoint, so each one flows through
+# validation -> qualification -> persist, exactly like production traffic.
+#
+# Requires BOTH running:
+#   php artisan serve
+#   php artisan queue:work
+# (ingestion is async — the 202 returns instantly, the lead persists in the job)
+#
+# `status` is intentionally omitted — LeadQualificationService resolves it.
+# Expected spread: 6 qualified · 4 under_review · 5 disqualified.
+########################################################################
+
+@host = http://127.0.0.1:8003
+
+### Qualified — RM350, landed, tile, Selangor
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Ahmad bin Ismail",
+  "email": "ahmad.ismail@example.com",
+  "phone": "012-3456789",
+  "monthly_bill_rm": 350,
+  "property_type": "landed",
+  "roof_type": "tile",
+  "state": "Selangor"
+}
+
+### Qualified — RM500, commercial, metal, Kuala Lumpur
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Tan Wei Ming",
+  "email": "weiming.tan@example.com",
+  "phone": "016-2233445",
+  "monthly_bill_rm": 500,
+  "property_type": "commercial",
+  "roof_type": "metal",
+  "state": "Kuala Lumpur"
+}
+
+### Qualified — RM280, landed, concrete, Pulau Pinang
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Priya Nair",
+  "email": "priya.nair@example.com",
+  "phone": "017-8899001",
+  "monthly_bill_rm": 280,
+  "property_type": "landed",
+  "roof_type": "concrete",
+  "state": "Pulau Pinang"
+}
+
+### Qualified — RM620, commercial, tile, Johor
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Lim Chong Wei",
+  "email": "chongwei.lim@example.com",
+  "phone": "013-5566778",
+  "monthly_bill_rm": 620,
+  "property_type": "commercial",
+  "roof_type": "tile",
+  "state": "Johor"
+}
+
+### Qualified — RM210, landed, metal, Perak
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Nurul Huda",
+  "email": "nurul.huda@example.com",
+  "phone": "011-22334455",
+  "monthly_bill_rm": 210,
+  "property_type": "landed",
+  "roof_type": "metal",
+  "state": "Perak"
+}
+
+### Qualified — RM450, landed, tile, Melaka
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Suresh Kumar",
+  "email": "suresh.kumar@example.com",
+  "phone": "019-7788990",
+  "monthly_bill_rm": 450,
+  "property_type": "landed",
+  "roof_type": "tile",
+  "state": "Melaka"
+}
+
+### Under review — RM180 (150-199 band), landed, tile, Negeri Sembilan
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Farah Aziz",
+  "email": "farah.aziz@example.com",
+  "phone": "018-1234567",
+  "monthly_bill_rm": 180,
+  "property_type": "landed",
+  "roof_type": "tile",
+  "state": "Negeri Sembilan"
+}
+
+### Under review — RM165, commercial, concrete, Kedah
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Wong Mei Ling",
+  "email": "meiling.wong@example.com",
+  "phone": "014-9988776",
+  "monthly_bill_rm": 165,
+  "property_type": "commercial",
+  "roof_type": "concrete",
+  "state": "Kedah"
+}
+
+### Under review — RM199 (upper edge), landed, metal, Pahang
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Raj Patel",
+  "email": "raj.patel@example.com",
+  "phone": "012-6655443",
+  "monthly_bill_rm": 199,
+  "property_type": "landed",
+  "roof_type": "metal",
+  "state": "Pahang"
+}
+
+### Under review — RM150 (lower edge), landed, tile, Terengganu
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Siti Aminah",
+  "email": "siti.aminah@example.com",
+  "phone": "017-3344556",
+  "monthly_bill_rm": 150,
+  "property_type": "landed",
+  "roof_type": "tile",
+  "state": "Terengganu"
+}
+
+### Disqualified — condo (property rule), RM320, Kuala Lumpur
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Chan Kok Leong",
+  "email": "kokleong.chan@example.com",
+  "phone": "016-7766554",
+  "monthly_bill_rm": 320,
+  "property_type": "condo",
+  "roof_type": "tile",
+  "state": "Kuala Lumpur"
+}
+
+### Disqualified — flat roof (beats review band even at RM400), Selangor
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Hafiz Rahman",
+  "email": "hafiz.rahman@example.com",
+  "phone": "013-2211009",
+  "monthly_bill_rm": 400,
+  "property_type": "landed",
+  "roof_type": "flat",
+  "state": "Selangor"
+}
+
+### Disqualified — Sabah (East Malaysia), RM500, commercial, metal
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Grace Lim",
+  "email": "grace.lim@example.com",
+  "phone": "019-4433221",
+  "monthly_bill_rm": 500,
+  "property_type": "commercial",
+  "roof_type": "metal",
+  "state": "Sabah"
+}
+
+### Disqualified — RM120 (below RM150 floor), landed, tile, Pulau Pinang
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Anand Krishnan",
+  "email": "anand.k@example.com",
+  "phone": "011-99887766",
+  "monthly_bill_rm": 120,
+  "property_type": "landed",
+  "roof_type": "tile",
+  "state": "Pulau Pinang"
+}
+
+### Disqualified — apartment + Sarawak, RM260, concrete
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Mohd Faizal",
+  "email": "faizal.mohd@example.com",
+  "phone": "018-5544332",
+  "monthly_bill_rm": 260,
+  "property_type": "apartment",
+  "roof_type": "concrete",
+  "state": "Sarawak"
+}
+
+########################################################################
+# Bonus — demonstrate edge behaviour
+########################################################################
+
+### Duplicate — identical to Ahmad above. Job logs "Duplicate lead ignored", no new row.
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Ahmad bin Ismail",
+  "email": "ahmad.ismail@example.com",
+  "phone": "012-3456789",
+  "monthly_bill_rm": 350,
+  "property_type": "landed",
+  "roof_type": "tile",
+  "state": "Selangor"
+}
+
+### Invalid input — expect 422 JSON (bad email, negative bill, unknown enum + state)
+POST {{host}}/api/leads
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customer_name": "Bad Lead",
+  "email": "not-an-email",
+  "phone": "",
+  "monthly_bill_rm": -5,
+  "property_type": "villa",
+  "roof_type": "tile",
+  "state": "Penang"
+}
