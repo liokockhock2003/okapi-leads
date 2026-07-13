@@ -38,6 +38,14 @@ class Lead extends Model
     ];
 
     /**
+     * Requirement 6 is about *changes*, not creation — so we audit `updated` and
+     * `deleted` only. Lead creation (API ingestion) is deliberately NOT logged.
+     * In this app leads are only ever changed via the Filament admin, so every
+     * audit row carries an admin causer.
+     */
+    protected static $recordEvents = ['updated', 'deleted'];
+
+    /**
      * Audit trail (requirement 6): log every customer-data change and every status
      * change — field, old → new, when — into the activity_log table. `logOnlyDirty`
      * records only the attributes that actually changed.
