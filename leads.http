@@ -13,7 +13,7 @@
 # Expected spread: 6 qualified · 4 under_review · 5 disqualified.
 ########################################################################
 
-@host = http://127.0.0.1:8003
+@host = http://127.0.0.1:8000
 
 ### Qualified — RM350, landed, tile, Selangor
 POST {{host}}/api/leads
