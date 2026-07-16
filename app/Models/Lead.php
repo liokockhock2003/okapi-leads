@@ -8,14 +8,12 @@ use App\Enums\LeadStatus;
 use App\Enums\MalaysianState;
 use App\Enums\PropertyType;
 use App\Enums\RoofType;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
 class Lead extends Model
 {
-    use HasFactory;
     use LogsActivity;
 
     protected $fillable = [

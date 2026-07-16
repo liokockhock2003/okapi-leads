@@ -155,10 +155,6 @@ class ActivityResource extends Resource
             return '—';
         }
 
-        if (is_bool($value)) {
-            return $value ? 'true' : 'false';
-        }
-
         return (string) $value;
     }
 
